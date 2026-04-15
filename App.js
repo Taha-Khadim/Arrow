@@ -1,20 +1,44 @@
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { GameProvider, useGame } from './src/context/GameContext';
+import AppNavigator from './src/navigation/AppNavigator';
+import { preloadSounds, setSoundsEnabled } from './src/utils/sounds';
+import { setHapticsEnabled } from './src/utils/haptics';
 
-export default function App() {
+function AppContent() {
+  const { isDark } = useTheme();
+  const { soundEnabled, hapticEnabled } = useGame();
+
+  useEffect(() => {
+    preloadSounds();
+  }, []);
+
+  useEffect(() => {
+    setSoundsEnabled(soundEnabled);
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    setHapticsEnabled(hapticEnabled);
+  }, [hapticEnabled]);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <AppNavigator />
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <GameProvider>
+          <AppContent />
+        </GameProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
